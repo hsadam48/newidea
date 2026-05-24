@@ -551,10 +551,37 @@ def wizard(
     # Interactive data review
     interactive_edit(payload)
 
-    # Payment and delivery entry
-    console.rule("[bold]Payment / Delivery")
-    if Confirm.ask("Enter/edit payment terms now?", default=False):
-        for v in VENDORS:
-            console.print(f"[bold]{v} Payment Terms[/bold]")
-            lines: List[str] = []
-            console.print("Enter lines (blank line to finish
+   # Payment and delivery entry
+console.rule("[bold]Payment / Delivery")
+if Confirm.ask("Enter/edit payment terms now?", default=False):
+    for v in VENDORS:
+        console.print(f"[bold]{v} Payment Terms[/bold]")
+        lines: List[str] = []
+        console.print("Enter lines (blank line to finish):")
+        while True:
+            ln = Prompt.ask("", default="")
+            if not ln.strip():
+                break
+            lines.append(ln)
+        payload["paymentTerms"][v] = lines
+
+if Confirm.ask("Enter/edit delivery program now?", default=False):
+    for v in VENDORS:
+        console.print(f"[bold]{v} Delivery Program[/bold]")
+        lines: List[str] = []
+        console.print("Enter lines (blank line to finish):")
+        while True:
+            ln = Prompt.ask("", default="")
+            if not ln.strip():
+                break
+            lines.append(ln)
+        payload["delivery"][v] = lines
+
+# Save JSON and generate Excel
+out_json = Prompt.ask("Save JSON as", default="comparison_data.json")
+Path(out_json).write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+console.print(f"[green]Saved[/green] {out_json}")
+
+out_xlsx = Prompt.ask("Excel filename", default="COMPARISON_SHEET_OUTPUT.xlsx")
+make_excel(payload, out_file=out_xlsx)
+console.print(f"[green]Excel written:[/green] {out_xlsx}")
